@@ -7,7 +7,7 @@
 
     <li v-for="(item, index) in barrageList" :key="index" class="barrage-item" :class="{self: item.self}">
       <!-- head -->
-      <div v-if="!item.anonymous" class="head"></div>
+      <div v-if="!item.anonymous" class="head" v-head="'./static/head/ic_head'+ personInfo.id+'@2x.png'"></div>
       <div v-else class="head"></div>
 
       <div class="info">
@@ -45,10 +45,7 @@ export default {
       container: null, // 弹幕容器
       containerW: 0, // 弹幕宽度
       containerH: 30, // 所有弹幕的高度 初始值是因为加了个padding-top
-      containerParentH: 0, // 弹幕显示区域的高度
-
-      color: ['pink', 'red', 'yellow', 'blue'],
-      colorL: 0
+      containerParentH: 0, // 弹幕显示区域的高
     }
   },
   created () {},
@@ -67,14 +64,8 @@ export default {
       this.containerParentH = this.container.parent().height()
       this.colorL = this.color.length
     },
-    // 获取随机字体颜色
-    colorRandom () {
-      const index = Math.floor(Math.random() * this.colorL)
-      return this.color[index]
-    },
 
     beforeEnter (el) {
-      // el.style.cssText = `color:${this.colorRandom()}`
     },
     // 此回调函数是可选项的设置
     // 与 CSS 结合时使用
@@ -120,12 +111,6 @@ export default {
   mounted () {
     this.$nextTick(() => {
       this.__init()
-      // 模拟数据
-      let index = 0
-      setInterval(() => {
-        this.barrageList.push({message: `的煎熬几个好啊和耦合个熊恶化${index}`, self: false, nickName: '爱你所爱'})
-        index++
-      }, 2000)
     })
   }
 }
@@ -134,11 +119,9 @@ export default {
 .barrage-container {
   padding-top: 30px;
   width: 100%;
-  height: 100%;
   box-sizing: border-box;
   overflow-x: hidden;
-  overflow-y: auto;
-  mask-image: linear-gradient(to top, rgba(0,0,0,1) 90%, rgba(0,0,0,0));
+  mask-image: linear-gradient(to top, rgba(0,0,0,1) 96%, rgba(0,0,0,0));
   &::-webkit-scrollbar {
     display: none;
   }
