@@ -32,7 +32,7 @@ Axios.interceptors.request.use(
     // 消息弹窗组件显示，类似toast
     // ...
     load(false)
-    toast(JSON.stringify(error))
+    toast(error)
     return Promise.reject(error.data.error.message)
   }
 )

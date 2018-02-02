@@ -26,5 +26,5 @@ export default {
 
 export const load = (value) => {
   const loadWrapper = document.querySelector('.loading-wrapper')
-  loadWrapper.style.display = 'block'
+  value ? (loadWrapper.style.display = 'block') : (loadWrapper.style.display = 'none')
 }

@@ -104,6 +104,7 @@ export default {
     __init () {
       this.bgImg = this.$refs.bgImg
       this.bgComplete()
+      this.getPersonInfo()
     },
     getPersonInfo () {
       this.$fetch({
@@ -212,12 +213,11 @@ export default {
       this.chatShow = true
     }
   },
-  created () {},
+  created () {
+  },
   mounted () {
     this.$nextTick(() => {
       this.__init()
-      // this.$toast('jianzaizhogn')
-      // this.$loading(true)
     })
   }
 }
