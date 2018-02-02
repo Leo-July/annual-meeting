@@ -8,14 +8,14 @@
     <li v-for="(item, index) in barrageList" :key="index" class="barrage-item" :class="{self: item.self}">
       <!-- head -->
       <div v-if="!item.anonymous" class="head" v-head="'./static/head/ic_head'+ personInfo.id+'@2x.png'"></div>
-      <div v-else class="head"></div>
+      <div v-else class="head" v-head="item.head"></div>
 
       <div class="info">
-        <p v-if="!item.anonymous" class="name">{{item.nickName}}</p>
+        <p v-if="!item.anonymous" class="name">{{item.name}}</p>
         <p v-else class="name">{{anonymousNameList[item.id]}}</p>
 
         <p class="message">
-          {{item.message}}
+          {{item.content}}
         </p>
       </div>
     </li>
@@ -45,7 +45,7 @@ export default {
       container: null, // 弹幕容器
       containerW: 0, // 弹幕宽度
       containerH: 30, // 所有弹幕的高度 初始值是因为加了个padding-top
-      containerParentH: 0, // 弹幕显示区域的高
+      containerParentH: 0 // 弹幕显示区域的高
     }
   },
   created () {},
@@ -120,7 +120,6 @@ export default {
   padding-top: 30px;
   width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
   mask-image: linear-gradient(to top, rgba(0,0,0,1) 96%, rgba(0,0,0,0));
   &::-webkit-scrollbar {
     display: none;
