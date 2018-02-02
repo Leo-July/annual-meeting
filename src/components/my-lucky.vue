@@ -59,6 +59,9 @@ export default {
       ],
       luckying: false,
       winShow: false,
+      signTotal: 0,
+      stop: null,
+      start: null,
       current: 0
     }
   },
@@ -77,6 +80,9 @@ export default {
     }
   },
   methods: {
+    __init () {
+      this.signTotal = this.signList.length
+    },
     getSignList () {
       this.$fetch({
         url: 'wx.php?a=AnnualDinner&m=signInList&userName=zsyl&passWord=wazsyl'
@@ -87,6 +93,17 @@ export default {
     luckyDraw () {
       this.luckying = true
       this.winShow = true
+    },
+    move () {},
+    stopInterval (duration) {
+      clearTimeout(this.stop)
+      clearInterval(this.start)
+      this.start = setInterval(() => {
+        this.current = this.getRandom()
+      }, duration)
+    },
+    getRandom () {
+      return Math.floor(Math.random() * (this.signTotal + 1))
     },
     enter (el, done) {
       velocity(
@@ -102,6 +119,9 @@ export default {
         { duration: 600, complete: done }
       )
     }
+  },
+  mounted () {
+    this.__init()
   }
 }
 </script>
