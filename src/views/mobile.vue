@@ -1,17 +1,22 @@
 <template>
   <div class="mobile-page" v-font:mobile>
-    <div class="bg" :class="{loaded: !loading}" @click="signInShow = true"><img @onload="bgComplete" src="../assets/images/ic_background@2x.png" alt="" ref="bgImg"></div>
+    <div class="bg" :class="{loaded: !loading}" @click="signShow = true"><img @onload="bgComplete" src="../assets/images/ic_background@2x.png" alt="" ref="bgImg"></div>
     <!-- sign in -->
-    <div class="sign-in" :class="{down: signInShow}">
-      <div class="sign-form" :class="{visible: signFormS}">
-        <div class="header"></div>
-        <input class="name" type="text" v-model.trim="name" placeholder="请输入您的真实姓名">
-        <div class="button" :class="{disabled: canSubmit}" @click="submit">确定</div>
+    <transition
+      v-on:enter="enter"
+      v-on:leave="leave"
+    >
+      <div class="sign-in" v-if="signShow">
+        <div class="sign-form" ref="signForm">
+          <div class="header"></div>
+          <input class="name" type="text" v-model.trim="name" placeholder="请输入您的真实姓名">
+          <div class="button" :class="{disabled: canSubmit}" @click="submit">确定</div>
+        </div>
       </div>
-    </div>
+    </transition>
 
     <!-- chat room -->
-    <div class="chat-room">
+    <div class="chat-room" v-if="chatShow">
       <!-- info -->
       <div class="info">
         <div class="head"></div>
@@ -45,6 +50,8 @@
 </template>
 <script>
 import barrage from '@/components/barrage-portrait'
+import velocity from 'velocity-animate'
+
 export default {
   name: 'mobile-page',
   components: {
@@ -54,16 +61,21 @@ export default {
     return {
       loading: true,
       bgImg: null,
-      signInShow: false, // 签到层显示
+      personInfo: {},
+      socket: null,
+      socketCode: 1,
       name: '', // name 表单
       canSubmit: false, // 是否可以提交
-      signFormS: false, // 签到form 显示
+      signShow: false, // 签到form 显示
+      chatShow: false, // 聊天室显示
+
       anonymous: false, // 匿名
       message: '', // message
       myMessageList: [], // 我发送的message列表
       canSend: false, // 是否可以发送message
       barrage: null, // 弹幕组件对象
-      anonymousNameList: [ // 匿名昵称
+      anonymousNameList: [
+        // 匿名昵称
         '感觉自己萌萌哒',
         '按时女汉子',
         '我污但不色',
@@ -80,14 +92,6 @@ export default {
         this.canSubmit = false
       }
     },
-    signInShow (value) {
-      if (value) {
-        const timer = setTimeout(() => {
-          this.signFormS = true
-          clearTimeout(timer)
-        }, 300)
-      }
-    },
     message (value) {
       if (value.length > 0) {
         this.canSend = true
@@ -95,12 +99,25 @@ export default {
         this.canSend = false
       }
     }
-
   },
   methods: {
     __init () {
       this.bgImg = this.$refs.bgImg
       this.bgComplete()
+    },
+    getPersonInfo () {
+      this.$fetch({
+        url: 'wx.php?a=AnnualDinner&m=user'
+      }).then(res => {
+        this.personInfo = res.data.content
+        this.__initWebSocket()
+
+        if (this.personInfo.name != '') {
+          this.chatShow = true
+        } else {
+          this.signShow = true
+        }
+      })
     },
     // 背景图片加载完成
     bgComplete () {
@@ -112,13 +129,19 @@ export default {
     // 签到 提交
     submit () {
       if (this.canSubmit) {
-
+        this.socket.send(JSON.stringify({'type': 'signIn', 'name': this.name}))
       }
     },
     // 发送message
     send () {
       if (this.canSend) {
-        this.myMessageList.push({id: 2, self: true, anonymous: this.anonymous, message: this.message, nickName: '一生所爱'})
+        this.myMessageList.push({
+          id: 2,
+          self: true,
+          anonymous: this.anonymous,
+          message: this.message,
+          nickName: '一生所爱'
+        })
         this.message = ''
         this.barrageScrollDown()
       }
@@ -133,6 +156,60 @@ export default {
       setTimeout(() => {
         this.barrage.scrollDownHook()
       }, 500)
+    },
+    // 此回调函数是可选项的设置
+    // 与 CSS 结合时使用
+    enter: function (el, done) {
+      velocity(
+        this.$refs.signForm,
+        { top: ['.58rem', '-100vh'] },
+        { duration: 600, complete: done }
+      )
+    },
+    // 此回调函数是可选项的设置
+    // 与 CSS 结合时使用
+    leave: function (el, done) {
+      velocity(
+        this.$refs.signForm,
+        {top: '-100vh'},
+        { duration: 3000, complete: done }
+      )
+    },
+    __initWebSocket () {
+      this.socket = new WebSocket(`ws://118.190.69.213:9999?id=${this.personInfo.id}&sign=${this.personInfo.sign}`)
+      this.socket.onmessage = this.onMessage
+      this.socket.onclose = this.onClose
+      this.socket.onerror = this.onError
+    },
+    onMessage (event) {
+      const data = JSON.parse(event.data)
+      if (data.code != 1) {
+        this.$toast(data.content)
+        return
+      }
+      switch (data.type) {
+        case 'signIn':
+          this.isSignIn()
+          break
+        case 'otherBarrage':
+          this.isOtherBarrage(data)
+          break
+        default :
+          break
+      }
+    },
+    onError () {
+      this.$toast('webSocket error')
+    },
+    onClose () {
+      this.socketCode == 1 ? this.__initWebSocket() : false
+    },
+    isOtherBarrage (data) {
+      this.myMessageList.push(data.content)
+    },
+    isSignIn (data) {
+      this.signShow = false
+      this.chatShow = true
     }
   },
   created () {},
@@ -146,7 +223,7 @@ export default {
 }
 </script>
 <style lang="less" scoped>
-@import url('../assets/less/common.less');
+@import url("../assets/less/common.less");
 .mobile-page {
   height: 100%;
   overflow: hidden;
@@ -154,7 +231,7 @@ export default {
 .bg {
   opacity: 0;
   transform: scale(0);
-  transition: all .3s linear;
+  transition: all 0.3s linear;
 }
 .loaded {
   opacity: 1;
@@ -162,34 +239,18 @@ export default {
 }
 .sign-in {
   .position-fill();
-  transform: translateY(-100%);
   overflow: hidden;
   &::before {
     content: "";
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 100vh;
-    height: 100vh;
-    border-radius: 50%;
+    .position-fill();
     z-index: 1;
     background: rgba(0, 0, 0, 0.6);
-    transform: translateX(-50%) scale(0);
-    transition: transform .3s ease-out;
   }
-  &.down{
-    transform: translateY(0);
-    &::before{
-      transform: translateX(-50%) scale(1.3);
-    }
-    .sign-form.visible{
-      top: .58rem;
-    }
-  }
-  .sign-form{
+  .sign-form {
     position: absolute;
-    top: -100%;
+    top: 0.58rem;
     left: 50%;
+    margin-left: -1.26rem;
     padding-top: 1.8rem;
     width: 2.52rem;
     height: 5.12rem;
@@ -197,12 +258,10 @@ export default {
     text-align: center;
     background: url(../assets/images/ic_popup@2x.png) no-repeat center/contain;
     z-index: 2;
-    transform: translateX(-50%);
-    transition: top .3s ;
   }
-  .header{
-    @width: .41rem;
-    margin: 0 auto .24rem;
+  .header {
+    @width: 0.41rem;
+    margin: 0 auto 0.24rem;
     width: @width;
     height: @width;
     border: 1px solid #fff;
@@ -213,153 +272,153 @@ export default {
     background-position: center;
     background-color: rgba(0, 0, 0, 0.6);
   }
-  .name{
+  .name {
     display: block;
-    margin: 0 auto .35rem;
+    margin: 0 auto 0.35rem;
     width: 1.7rem;
     border-bottom: 1px solid #fff;
-    font-size: .18rem;
+    font-size: 0.18rem;
     font-weight: lighter;
     text-align: center;
     color: #fff;
-    &::-webkit-input-placeholder{
-      color: rgba(255,255,255,.5);
+    &::-webkit-input-placeholder {
+      color: rgba(255, 255, 255, 0.5);
     }
   }
-  .button{
+  .button {
     margin: 0 auto;
     width: 1.53rem;
-    height: .4rem;
-    line-height: .4rem;
-    border-radius: .04rem;
-    background: #FF9600;
-    font-size: .18rem;
-    color: #DF6F0C;
-    box-shadow: 0 3px 0 0 #FD7100;
-    &.disabled{
-      color: #AE2B1E;
-      background: #FFDE00;
+    height: 0.4rem;
+    line-height: 0.4rem;
+    border-radius: 0.04rem;
+    background: #ff9600;
+    font-size: 0.18rem;
+    color: #df6f0c;
+    box-shadow: 0 3px 0 0 #fd7100;
+    &.disabled {
+      color: #ae2b1e;
+      background: #ffde00;
     }
   }
 }
-  .chat-room{
-    .position-fill();
+.chat-room {
+  .position-fill();
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.6);
+  .info {
     display: flex;
-    flex-direction: column;
-    background: rgba(0, 0, 0, 0.6);
-    .info{
-      display: flex;
-      align-items: center;
-      padding: .1rem .15rem .22rem;
-      .head{
-        @width: .43rem;
-        margin-right: .1rem;
-        width: @width;
-        height: @width;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.6);
-      }
-      .name-wrapper{
-        flex: 1;
-      }
-      .nick-name{
-        font-size: .17rem;
-        color: #fff;
-      }
-      .real-name{
-        font-size: .14rem;
-        color: rgba(255, 255, 255, .7);
-      }
+    align-items: center;
+    padding: 0.1rem 0.15rem 0.22rem;
+    .head {
+      @width: 0.43rem;
+      margin-right: 0.1rem;
+      width: @width;
+      height: @width;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.6);
     }
-    .comment{
-      position: relative;
+    .name-wrapper {
       flex: 1;
-      overflow: hidden;
-      font-size: .17rem;
+    }
+    .nick-name {
+      font-size: 0.17rem;
+      color: #fff;
+    }
+    .real-name {
+      font-size: 0.14rem;
+      color: rgba(255, 255, 255, 0.7);
     }
   }
-  .send-wrapper{
-    display: flex;
-    padding: 0 0 0 .15rem;
-    // align-items: center;
-    height: .6rem;
-    box-sizing: border-box;
-    background: #fff;
+  .comment {
+    position: relative;
+    flex: 1;
     overflow: hidden;
-    .switch{
-      position: relative;
+    font-size: 0.17rem;
+  }
+}
+.send-wrapper {
+  display: flex;
+  padding: 0 0 0 0.15rem;
+  // align-items: center;
+  height: 0.6rem;
+  box-sizing: border-box;
+  background: #fff;
+  overflow: hidden;
+  .switch {
+    position: relative;
+    top: 50%;
+    flex: 0 0 0.44rem;
+    margin-right: 0.3rem;
+    height: 0.16rem;
+    border-radius: 0.16rem;
+    background: #c6c5c5;
+    transition: all 0.3s linear;
+    transform: translateY(-50%);
+    &::after {
+      content: "\533f";
+      position: absolute;
       top: 50%;
-      flex: 0 0 .44rem;
-      margin-right: .3rem;
-      height: .16rem;
-      border-radius: .16rem;
-      background: #C6C5C5;
-      transition: all .3s linear;
-      transform: translateY(-50%);
-      &::after{
-        content: "\533f";
-        position: absolute;
-        top: 50%;
-        left: 0;
-        @width: .22rem;
-        width: @width;
-        height: @width;
-        line-height: @width;
-        border-radius: 50%;
-        background: #F1F1F1;
-        font-size: .1rem;
-        color: #C6C5C5;
-        text-align: center;
-        transform: translate3d(0, -50%,0);
-        transition: all .3s linear;
-      }
-      &.anonymous{
-        background: #7FDAC7;
-        &::after{
-          left: 100%;
-          color: #fff;
-          background: #00B58F;
-          transform: translate3d(-100%, -50%,0);
-        }
-      }
+      left: 0;
+      @width: 0.22rem;
+      width: @width;
+      height: @width;
+      line-height: @width;
+      border-radius: 50%;
+      background: #f1f1f1;
+      font-size: 0.1rem;
+      color: #c6c5c5;
+      text-align: center;
+      transform: translate3d(0, -50%, 0);
+      transition: all 0.3s linear;
     }
-    .input-send{
-      @height: .56rem;
-      display: flex;
-      align-items: center;
-      position: relative;
-      top: .04rem;
-      padding: 0 0 0 .25rem;
-      flex: 1;
-      height: @height;
-      border-top-left-radius: @height / 2;
-      background: #F5F5F5;
-      .input-comment{
-        display: block;
-        flex: 1;
-        height: 100%;
-        font-size: .15rem;
-        // text-indent: .25rem;
-        word-wrap: break-word;
-        word-break: break-all;
-        caret-color: #157CF8;
-        &::-webkit-input-placeholder{
-          color: #D1D1D1;
-        }
-      }
-      .send-button{
-        @width: .17rem;
-        width: .56rem;
-        height: 100%;
-        font-size: 0;
-        background-repeat: no-repeat;
-        background-size: @width;
-        background-position: center;
-        background-image: url(../assets/images/send1@2x.png);
-        &.disabled{
-          background-image: url(../assets/images/send2@2x.png);
-        }
+    &.anonymous {
+      background: #7fdac7;
+      &::after {
+        left: 100%;
+        color: #fff;
+        background: #00b58f;
+        transform: translate3d(-100%, -50%, 0);
       }
     }
   }
+  .input-send {
+    @height: 0.56rem;
+    display: flex;
+    align-items: center;
+    position: relative;
+    top: 0.04rem;
+    padding: 0 0 0 0.25rem;
+    flex: 1;
+    height: @height;
+    border-top-left-radius: @height / 2;
+    background: #f5f5f5;
+    .input-comment {
+      display: block;
+      flex: 1;
+      height: 100%;
+      font-size: 0.15rem;
+      // text-indent: .25rem;
+      word-wrap: break-word;
+      word-break: break-all;
+      caret-color: #157cf8;
+      &::-webkit-input-placeholder {
+        color: #d1d1d1;
+      }
+    }
+    .send-button {
+      @width: 0.17rem;
+      width: 0.56rem;
+      height: 100%;
+      font-size: 0;
+      background-repeat: no-repeat;
+      background-size: @width;
+      background-position: center;
+      background-image: url(../assets/images/send1@2x.png);
+      &.disabled {
+        background-image: url(../assets/images/send2@2x.png);
+      }
+    }
+  }
+}
 </style>

@@ -32,6 +32,7 @@ Axios.interceptors.request.use(
     // 消息弹窗组件显示，类似toast
     // ...
     load(false)
+    toast(JSON.stringify(error))
     return Promise.reject(error.data.error.message)
   }
 )
@@ -39,16 +40,18 @@ Axios.interceptors.request.use(
 // 返回状态判断（添加响应拦截器）
 Axios.interceptors.response.use(
   res => {
+    load(false)
     // 对响应数据做些事(请求成功，当时接口返回出错)
-    if (res.data && !res.data.success) {
+    if (res.data && res.data.code != 1) {
       // 消息弹窗组件显示，类似toast
       // ...res.data.error.message
-
+      toast(res.data.content)
       return Promise.reject(res.data.error.message)
     }
     return res
   },
   error => {
+    load(false)
     // 返回 response 里的错误信息
     toast(error)
     // 消息弹窗组件显示，类似toast
