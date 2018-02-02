@@ -18,7 +18,7 @@
     "less-loader": "^4.0.5",
     "velocity-animate": "^1.5.1",
     "vue": "^2.5.2",
-    "vue-awesome-swiper": "^3.1.0",
+    "vue-awesome-swiper": "^3.1.2",
     "vue-router": "^3.0.1",
     "zepto": "^1.2.0"
   },
