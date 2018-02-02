@@ -4,6 +4,7 @@
       <swiper-slide class="home slide">
       </swiper-slide>
       <swiper-slide class="lucky slide">
+        <lucky></lucky>
       </swiper-slide>
     </swiper>
     <!-- <div class="barrage-wrapper">
@@ -15,12 +16,14 @@
 import barrage from '@/components/barrage-landscape.vue'
 import 'swiper/dist/css/swiper.css'
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
+import lucky from '@/components/my-lucky'
 
 export default {
   components: {
     barrage,
     swiper,
-    swiperSlide
+    swiperSlide,
+    lucky
   },
   data () {
     return {
