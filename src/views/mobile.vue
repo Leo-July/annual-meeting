@@ -8,7 +8,7 @@
     >
       <div class="sign-in" v-if="signShow">
         <div class="sign-form" ref="signForm">
-          <div class="header"></div>
+          <div class="header" v-head="personInfo.head"></div>
           <input class="name" type="text" v-model.trim="name" placeholder="请输入您的真实姓名">
           <div class="button" :class="{disabled: canSubmit}" @click="submit">确定</div>
         </div>
@@ -19,10 +19,10 @@
     <div class="chat-room" v-if="chatShow">
       <!-- info -->
       <div class="info">
-        <div class="head"></div>
+        <div class="head" v-head="personInfo.head"></div>
         <div class="name-wrapper">
-          <p class="nick-name">匿名：你是猪</p>
-          <p class="real-name">追勤于</p>
+          <p class="nick-name">匿名：{{anonymousNameList[personInfo.id]}}</p>
+          <p class="real-name">{{personInfo.name}}</p>
         </div>
       </div>
 
@@ -51,6 +51,7 @@
 <script>
 import barrage from '@/components/barrage-portrait'
 import velocity from 'velocity-animate'
+import anonymousList from '@/assets/js/anonymousList.js'
 
 export default {
   name: 'mobile-page',
@@ -74,14 +75,7 @@ export default {
       myMessageList: [], // 我发送的message列表
       canSend: false, // 是否可以发送message
       barrage: null, // 弹幕组件对象
-      anonymousNameList: [
-        // 匿名昵称
-        '感觉自己萌萌哒',
-        '按时女汉子',
-        '我污但不色',
-        '你丑你先睡',
-        '乡村土鳖'
-      ]
+      anonymousNameList: anonymousList
     }
   },
   watch: {
@@ -137,11 +131,9 @@ export default {
     send () {
       if (this.canSend) {
         this.myMessageList.push({
-          id: 2,
+          ...this.personInfo,
           self: true,
-          anonymous: this.anonymous,
-          message: this.message,
-          nickName: '一生所爱'
+          anonymous: this.anonymous
         })
         this.message = ''
         this.barrageScrollDown()
@@ -333,8 +325,10 @@ export default {
   .comment {
     position: relative;
     flex: 1;
-    overflow: hidden;
     font-size: 0.17rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }
 .send-wrapper {

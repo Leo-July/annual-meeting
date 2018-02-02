@@ -1,4 +1,4 @@
 export default [
-	'ddd',
-	'dgeee',
+  'ddd',
+  'dgeee'
 ]
