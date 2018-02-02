@@ -139,6 +139,8 @@ export default {
   mounted () {
     this.$nextTick(() => {
       this.__init()
+      // this.$toast('jianzaizhogn')
+      // this.$loading(true)
     })
   }
 }
