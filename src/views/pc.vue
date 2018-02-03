@@ -7,9 +7,9 @@
         <lucky></lucky>
       </swiper-slide>
     </swiper>
-    <!-- <div class="barrage-wrapper">
+    <div class="barrage-wrapper">
       <barrage></barrage>
-    </div> -->
+    </div>
   </div>
 </template>
 <script>
@@ -54,9 +54,12 @@ export default {
   }
 }
 .barrage-wrapper{
-  width: 300px;
-  height: 400px;
-  background: yellowgreen;
+  position: fixed;
+  right: 0;
+  bottom: .8rem;
+  left: 0;
+  height: 4rem;
   overflow: hidden;
+  z-index: 999;
 }
 </style>
