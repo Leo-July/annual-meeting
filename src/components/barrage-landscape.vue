@@ -6,7 +6,9 @@
     >
 
     <li v-for="(item, index) in barrageList" :key="index" class="barrage-item">
-      <div class="head" v-head="item.head"></div>
+      <div v-if="!item.anonymous" class="head" v-head="'../../static/head/ic_head'+ item.id+'@2x.png'"></div>
+      <div v-else class="head" v-head="item.head"></div>
+
       <p class="content">
         {{ item.content}}
       </p>

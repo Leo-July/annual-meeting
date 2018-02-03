@@ -7,7 +7,7 @@
 
     <li v-for="(item, index) in barrageList" :key="index" class="barrage-item" :class="{self: item.self}">
       <!-- head -->
-      <div v-if="!item.anonymous" class="head" v-head="'./static/head/ic_head'+ personInfo.id+'@2x.png'"></div>
+      <div v-if="!item.anonymous" class="head" v-head="'../../static/head/ic_head'+ item.id+'@2x.png'"></div>
       <div v-else class="head" v-head="item.head"></div>
 
       <div class="info">
@@ -62,7 +62,6 @@ export default {
       this.container = $('.barrage-container')
       this.containerW = this.container.width()
       this.containerParentH = this.container.parent().height()
-      this.colorL = this.color.length
     },
 
     beforeEnter (el) {
