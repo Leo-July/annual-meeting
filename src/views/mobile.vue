@@ -34,13 +34,13 @@
       <!-- send message -->
       <div class="send-wrapper">
         <!-- anonymous -->
-        <div class="switch" :class="{anonymous: anonymous}" @click="anonymous = !anonymous">
+        <div class="switch" :class="{anonymous: anonymous}" @click="switchAnonymous">
 
         </div>
 
         <!-- input -->
         <div class="input-send">
-          <input  v-model.trim="message" @focus="messageFocus" class="input-comment" type="text" placeholder="说点什么...">
+          <input  v-model.trim="message" @focus="messageFocus" class="input-comment" type="text" placeholder="说点什么..." ref="message">
           <div class="send-button" :class="{disabled: canSend}" @click="send">send-button</div>
         </div>
       </div>
@@ -130,14 +130,18 @@ export default {
     // 发送message
     send () {
       if (this.canSend) {
-        this.myMessageList.push({
-          ...this.personInfo,
-          self: true,
-          anonymous: this.anonymous
-        })
-        this.message = ''
-        this.barrageScrollDown()
+        this.$refs.message.focus()
+        this.socket.send(JSON.stringify({
+          type: 'barrage',
+          content: this.message,
+          anonymous: this.anonymous ? 1 : 0
+        }))
       }
+    },
+    // 匿名 切换
+    switchAnonymous () {
+      this.anonymous = !this.anonymous
+      this.$refs.message.focus()
     },
     // message input 获取焦点后
     messageFocus () {
@@ -187,6 +191,9 @@ export default {
         case 'otherBarrage':
           this.isOtherBarrage(data)
           break
+        case 'barrage':
+          this.isBarrage()
+          break
         default :
           break
       }
@@ -203,6 +210,15 @@ export default {
     isSignIn (data) {
       this.signShow = false
       this.chatShow = true
+    },
+    isBarrage () {
+      this.myMessageList.push({
+        ...this.personInfo,
+        content: this.message,
+        self: true,
+        anonymous: this.anonymous
+      })
+      this.message = ''
     }
   },
   created () {
