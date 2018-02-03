@@ -227,6 +227,10 @@ export default {
     this.$nextTick(() => {
       this.__init()
     })
+  },
+  beforeDestroy () {
+    this.socketCode = 0
+    this.socket.close()
   }
 }
 </script>

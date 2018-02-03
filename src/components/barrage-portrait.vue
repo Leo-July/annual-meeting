@@ -7,11 +7,11 @@
 
     <li v-for="(item, index) in barrageList" :key="index" class="barrage-item" :class="{self: item.self}">
       <!-- head -->
-      <div v-if="!item.anonymous" class="head" v-head="'../../static/head/ic_head'+ item.id+'@2x.png'"></div>
+      <div v-if="item.anonymous" class="head" v-head="'./head/ic_head'+ item.id+'@2x.png'"></div>
       <div v-else class="head" v-head="item.head"></div>
 
       <div class="info">
-        <p v-if="!item.anonymous" class="name">{{item.name}}</p>
+        <p v-if="item.anonymous" class="name">{{item.name}}</p>
         <p v-else class="name">{{anonymousNameList[item.id]}}</p>
 
         <p class="message">
