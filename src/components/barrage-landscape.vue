@@ -37,7 +37,9 @@ export default {
         '#e818ff',
         '#289918'
       ],
-      colorL: 0
+      colorL: 0,
+      socket: null,
+      socketCode: 1
     }
   },
   created () {},
@@ -47,6 +49,37 @@ export default {
       this.containerW = this.container.width()
       this.containerParentH = this.container.parent().height()
       this.colorL = this.color.length
+      this.__initWebSocket()
+    },
+    // 初始化websocket
+    __initWebSocket () {
+      this.socket = new WebSocket(`ws://118.190.69.213:9999?userName=zsyl&passWord=wazsyl`)
+      this.socket.onmessage = this.onMessage
+      this.socket.onclose = this.onClose
+      this.socket.onerror = this.onError
+    },
+    onMessage (event) {
+      const data = JSON.parse(event.data)
+      if (data.code != 1) {
+        this.$toast(data.content)
+        return
+      }
+      switch (data.type) {
+        case 'otherBarrage':
+          this.isOtherBarrage(data)
+          break
+        default :
+          break
+      }
+    },
+    onError () {
+      this.$toast('webSocket error')
+    },
+    onClose () {
+      this.socketCode == 1 ? this.__initWebSocket() : false
+    },
+    isOtherBarrage (data) {
+      this.barrageList.push(data.content)
     },
     // 随机获取定位
     positionRandom (el) {
