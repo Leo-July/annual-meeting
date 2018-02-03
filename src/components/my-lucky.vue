@@ -35,35 +35,15 @@ export default {
   name: 'lucky',
   data () {
     return {
-      signList: [
-        {
-          'head': 'http:\/\/wx.qlogo.cn\/mmopen\/vi_32\/Q0j4TwGTfTJqibb3ibNYvm4icXNeRjGicJVD6PXzY5oIFHicD5Z6pNfrfIQicTZCeQpfzH1q5JJm3fIgVpeF7HlxPZPw\/132',
-          'name': 'test'
-        },
-        {
-          'head': 'http:\/\/wx.qlogo.cn\/mmopen\/vi_32\/Q0j4TwGTfTJqibb3ibNYvm4icXNeRjGicJVD6PXzY5oIFHicD5Z6pNfrfIQicTZCeQpfzH1q5JJm3fIgVpeF7HlxPZPw\/132',
-          'name': 'test'
-        },
-        {
-          'head': 'http:\/\/wx.qlogo.cn\/mmopen\/vi_32\/Q0j4TwGTfTJqibb3ibNYvm4icXNeRjGicJVD6PXzY5oIFHicD5Z6pNfrfIQicTZCeQpfzH1q5JJm3fIgVpeF7HlxPZPw\/132',
-          'name': 'test'
-        },
-        {
-          'head': 'http:\/\/wx.qlogo.cn\/mmopen\/vi_32\/Q0j4TwGTfTJqibb3ibNYvm4icXNeRjGicJVD6PXzY5oIFHicD5Z6pNfrfIQicTZCeQpfzH1q5JJm3fIgVpeF7HlxPZPw\/132',
-          'name': 'test'
-        },
-        {
-          'head': 'http:\/\/wx.qlogo.cn\/mmopen\/vi_32\/Q0j4TwGTfTJqibb3ibNYvm4icXNeRjGicJVD6PXzY5oIFHicD5Z6pNfrfIQicTZCeQpfzH1q5JJm3fIgVpeF7HlxPZPw\/132',
-          'name': 'test'
-        }
-      ],
+      signList: [],
       luckying: false,
       winShow: false,
       signTotal: 0,
       hadwinList: [],
       stop: null,
       start: null,
-      current: 0
+      current: 0,
+      timer: null
     }
   },
   watch: {
@@ -78,6 +58,9 @@ export default {
       } else {
         body.onclick = () => {}
       }
+    },
+    signList () {
+      this.signTotal = this.signList.length
     }
   },
   methods: {
@@ -85,13 +68,23 @@ export default {
       const hadWinStorage = localStorage.getItem('hadWinList')
       hadWinStorage ? (this.hadwinList = JSON.parse(hadWinStorage)) : false
 
-      this.signTotal = this.signList.length
+      this.getSignList()
+      this.timer = setInterval(() => {
+        this.getSignList()
+      }, 5000)
     },
     getSignList () {
       this.$fetch({
         url: 'wx.php?a=AnnualDinner&m=signInList&userName=zsyl&passWord=wazsyl'
       }).then(res => {
-        this.signList = res.data
+        const list = res.data.content
+        const listLen = list.length
+        if (listLen !== this.signTotal) {
+          const newItemList = list.slice(this.signTotal)
+          this.signList.push(...newItemList)
+        }
+      }).catch(error => {
+        console.log(error)
       })
     },
     luckyDraw () {
