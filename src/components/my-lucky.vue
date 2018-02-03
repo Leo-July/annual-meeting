@@ -20,7 +20,7 @@
       v-on:enter="enter"
       v-on:leave="leave"
     >
-      <div class="win" v-show="winShow">
+      <div class="win" v-if="winShow">
         <div class="head" v-head="signList[current].head"></div>
         <p class="name">{{signList[current].name}}</p>
       </div>
@@ -60,6 +60,7 @@ export default {
       luckying: false,
       winShow: false,
       signTotal: 0,
+      hadwinList: [],
       stop: null,
       start: null,
       current: 0
@@ -81,6 +82,9 @@ export default {
   },
   methods: {
     __init () {
+      const hadWinStorage = localStorage.getItem('hadWinList')
+      hadWinStorage ? (this.hadwinList = JSON.parse(hadWinStorage)) : false
+
       this.signTotal = this.signList.length
     },
     getSignList () {
@@ -92,9 +96,24 @@ export default {
     },
     luckyDraw () {
       this.luckying = true
-      this.winShow = true
+      this.move()
     },
-    move () {},
+    move () {
+      this.start = setInterval(() => {
+        this.current = this.getRandom()
+      }, 100)
+      this.stop = setTimeout(() => {
+        this.stopInterval(500)
+        this.stop = setTimeout(() => {
+          this.stopInterval(700)
+          this.stop = setTimeout(() => {
+            this.stopInterval(900)
+            clearInterval(this.start)
+            this.isHadWin()
+          }, 2100)
+        }, 2000)
+      }, 3000)
+    },
     stopInterval (duration) {
       clearTimeout(this.stop)
       clearInterval(this.start)
@@ -103,7 +122,21 @@ export default {
       }, duration)
     },
     getRandom () {
-      return Math.floor(Math.random() * (this.signTotal + 1))
+      return Math.floor(Math.random() * this.signTotal)
+    },
+    isHadWin () {
+      const currentName = this.signList[this.current].name
+      if (this.hadwinList.includes(currentName)) {
+        const keepGo = setTimeout(() => {
+          this.current = this.getRandom()
+          clearTimeout(keepGo)
+          this.isHadWin()
+        }, 900)
+      } else {
+        this.hadwinList.push(currentName)
+        localStorage.setItem('hadWinList', JSON.stringify(this.hadwinList))
+        this.winShow = true
+      }
     },
     enter (el, done) {
       velocity(
@@ -119,6 +152,8 @@ export default {
         { duration: 600, complete: done }
       )
     }
+  },
+  created () {
   },
   mounted () {
     this.__init()
