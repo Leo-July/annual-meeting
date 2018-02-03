@@ -36,6 +36,7 @@ export default {
   bottom: 0;
   left: 0;
   background: rgba(0,0,0,0.5);
+  z-index: 9999;
 }
 .loading {
   position: relative;

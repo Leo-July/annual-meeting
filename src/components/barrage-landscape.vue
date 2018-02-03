@@ -6,7 +6,7 @@
     >
 
     <li v-for="(item, index) in barrageList" :key="index" class="barrage-item">
-      <div v-if="item.anonymous" class="head" v-head="'./head/ic_head'+ item.id+'@2x.png'"></div>
+      <div v-if="item.anonymous" class="head" v-head="'./static/head/ic_head'+ item.id+'@2x.png'"></div>
       <div v-else class="head" v-head="item.head"></div>
 
       <p class="content">
@@ -62,6 +62,10 @@ export default {
     },
     onMessage (event) {
       const data = JSON.parse(event.data)
+      console.log(data)
+      this.$toast(data.content, 4000)
+
+      this.socketCode = data.code
       if (data.code != 1) {
         this.$toast(data.content)
         return
@@ -78,7 +82,9 @@ export default {
       this.$toast('webSocket error')
     },
     onClose () {
-      this.socketCode == 1 ? this.__initWebSocket() : false
+      this.$nextTick(() => {
+        this.socketCode == 1 ? this.__initWebSocket() : false
+      })
     },
     isOtherBarrage (data) {
       this.barrageList.push(data.content)

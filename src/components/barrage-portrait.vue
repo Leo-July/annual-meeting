@@ -7,12 +7,12 @@
 
     <li v-for="(item, index) in barrageList" :key="index" class="barrage-item" :class="{self: item.self}">
       <!-- head -->
-      <div v-if="item.anonymous" class="head" v-head="'./head/ic_head'+ item.id+'@2x.png'"></div>
+      <div v-if="item.anonymous" class="head" v-head="'./static/head/ic_head'+ item.id+'@2x.png'"></div>
       <div v-else class="head" v-head="item.head"></div>
 
       <div class="info">
-        <p v-if="item.anonymous" class="name">{{item.name}}</p>
-        <p v-else class="name">{{anonymousNameList[item.id]}}</p>
+        <p v-if="item.anonymous" class="name">{{anonymousNameList[item.id]}}</p>
+        <p v-else class="name">{{item.name}}</p>
 
         <p class="message">
           {{item.content}}
@@ -64,8 +64,7 @@ export default {
       this.containerParentH = this.container.parent().height()
     },
 
-    beforeEnter (el) {
-    },
+    beforeEnter (el) {},
     // 此回调函数是可选项的设置
     // 与 CSS 结合时使用
     enter: function (el, done) {
@@ -118,8 +117,12 @@ export default {
 .barrage-container {
   padding-top: 30px;
   width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
-  mask-image: linear-gradient(to top, rgba(0,0,0,1) 96%, rgba(0,0,0,0));
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 96%, rgba(0, 0, 0, 0));
   &::-webkit-scrollbar {
     display: none;
   }
@@ -133,23 +136,23 @@ export default {
   box-sizing: border-box;
   color: #fff;
   z-index: 1;
-  &.self{
+  &.self {
     flex-direction: row-reverse;
-    .name{
+    .name {
       text-align: right;
     }
-    .message{
-      background: #00B58F !important;
+    .message {
+      background: #00b58f !important;
     }
   }
   &::before {
     content: "";
-    flex: 0 0 .1rem;
+    flex: 0 0 0.1rem;
   }
   &::after {
     content: "";
     flex: 1;
-    min-width: .54rem;
+    min-width: 0.54rem;
   }
   .head {
     @width: 0.33rem;

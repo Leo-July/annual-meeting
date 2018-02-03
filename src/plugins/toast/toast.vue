@@ -29,6 +29,7 @@ export default {
   color: #fff;
   transition: transform 0.3s ease-out;
   transform: translate3d(-50%, -50%, 0) scale(0);
+  z-index: 9999;
   &.visible {
     transform: translate3d(-50%, -50%, 0) scale(1);
   }

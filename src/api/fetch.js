@@ -1,6 +1,6 @@
 import axios from 'axios'
 import qs from 'qs'
-import {load} from '@/plugins/loading/loading.js'
+// import {load} from '@/plugins/loading/loading.js'
 import {toast} from '@/plugins/toast/toast.js'
 
 const Axios = axios.create({
@@ -11,7 +11,7 @@ const Axios = axios.create({
 // POST 传参序列化（添加请求拦截器）
 Axios.interceptors.request.use(
   config => {
-    load(true)
+    // load(true)
     // 在发送请求之前做某事
     if (
       config.method === 'post' ||
@@ -31,7 +31,7 @@ Axios.interceptors.request.use(
   error => {
     // 消息弹窗组件显示，类似toast
     // ...
-    load(false)
+    // load(false)
     toast(error)
     return Promise.reject(error.data.error.message)
   }
@@ -40,7 +40,7 @@ Axios.interceptors.request.use(
 // 返回状态判断（添加响应拦截器）
 Axios.interceptors.response.use(
   res => {
-    load(false)
+    // load(false)
     // 对响应数据做些事(请求成功，当时接口返回出错)
     if (res.data && res.data.code != 1) {
       // 消息弹窗组件显示，类似toast
@@ -51,7 +51,7 @@ Axios.interceptors.response.use(
     return res
   },
   error => {
-    load(false)
+    // load(false)
     // 返回 response 里的错误信息
     toast(error)
     // 消息弹窗组件显示，类似toast

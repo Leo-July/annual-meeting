@@ -64,7 +64,7 @@ export default {
       bgImg: null,
       personInfo: {},
       socket: null,
-      socketCode: 1,
+      socketCode: 0,
       name: '', // name 表单
       canSubmit: false, // 是否可以提交
       signShow: false, // 签到form 显示
@@ -180,6 +180,8 @@ export default {
     },
     onMessage (event) {
       const data = JSON.parse(event.data)
+      console.log(data)
+      this.socketCode = data.code
       if (data.code != 1) {
         this.$toast(data.content)
         return
@@ -346,9 +348,7 @@ export default {
     position: relative;
     flex: 1;
     font-size: 0.17rem;
-    overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow: hidden;
   }
 }
 .send-wrapper {
