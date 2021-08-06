@@ -1,6 +1,6 @@
 # annual-meeting
 
-> 2018 annual meeting ziSeYiLiao
+> 年会抽奖、弹幕、聊天
 
 ## Build Setup
 
